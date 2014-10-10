@@ -1,0 +1,32 @@
+
+I don't have the descriptions of the dice.
+
+There are 7 dice in a bowl. Each die has 2 colors on: Red and Blue. The number of sides and the number of red sides and blue sides varries depending on the dice. The dice is either chosen at random out of a box or specifically chosen by the player. The player wins when his guess is the same color as the chosen dice.
+
+
+The order the information is presented may change the results chosen. For example, the X1 die was rolled and the player selected the color blue and the result of the roll was blue seems to imply that the player didn't know the roll whereas the X1 de was rolled and it was blue and the player chose blue seems to imply that the player knew the role before selecting a color.
+
+
+Case 1 The X1 die was rolled. The player selected the color blue. The result of the roll was blue.
+Case 2 The X1 die was rolled. The player selected the color red. The result of the roll was blue.
+Case 3 The X2 die was rolled. The player selected the color blue. The result of the roll was blue.
+Case 4 The X2 die was rolled. The player selected the color red. The result of the roll was blue.
+Case 5 The X3 die was rolled. The player selected the color blue. The result of the roll was blue.
+Case 6 The X3 die was rolled. The player selected the color red. The result of the roll was blue.
+Case 7 The X4 die was rolled. The player selected the color blue. The result of the roll was blue.
+Case 8 The X4 die was rolled. The player selected the color red. The result of the roll was blue.
+Case 9 The X5 die was rolled. The player selected the color blue. The result of the roll was blue.
+Case 10 The X5 die was rolled. The player selected the color red. The result of the roll was blue.
+Case 11 The X6 die was rolled. The player selected the color blue. The result of the roll was blue.
+Case 12 The X6 die was rolled. The player selected the color red. The result of the roll was blue.
+Case 13 The X7 die was rolled. The player selected the color blue. The result of the roll was blue.
+Case 14 The X7 die was rolled. The player selected the color red. The result of the roll was blue.
+
+
+Rate how satisfying each of the following explanations are:
+     1. The die was chosen randomly and the player saw the result of the roll before chosing a color.
+     2. The die was chosen randomly and the player knew which die was selected before guessing the color.
+     3. The die was chosen randomly and the player knew which die was selected and the result of the roll before chosing a color.
+     4. The die was chosen randomly and the player guessed a color.
+     5. The player selected a die and guess what color it would be.
+     6. The player selected a die and saw the result of the roll before chosing a color.
