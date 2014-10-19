@@ -28,23 +28,30 @@ def numberOfVals(node):
 def complexity(ID):
     # calculates complexity according to sum((valsNode-1)*valsParents for all nodes)
     val = 0
+    val2 = 0
     eq = ''
+    eq2 = ''
     # for each node
     for node in ID['nodes']:
         q = 0
+        q2 = 0
         for p in node['parents']:
             parent = getNodeForid(p, ID['nodes'])
             # if the node is a decision and its parent is chance, ignore the edge
             if node['type'] == 'decision' and parent['type'] == 'chance': 
                 # ignore chance to decision edges
+                q2 += numberOfVals(parent)
                 continue
             # get the number of values for this parent
             q += numberOfVals(parent)
         eq += '('+str(numberOfVals(node))+'-1) * '+str(q)+' + '
+        eq2 += '('+str(numberOfVals(node))+'-1) * '+str(q+q2)+' + '
         # compute the complexity of this node
         val += (numberOfVals(node)-1)*q
+        val2 += (numberOfVals(node)-1)*(q+q2)
     print eq[:-1]+' = '+str(val)
-    return val
+    print eq2[:-1]+' = '+str(val2)
+    return (val, val2)
 
 
 def allDecisions(net):
@@ -77,7 +84,7 @@ def probMaxReward(net, decisions, chanceValues):
     for node in net['nodes']:
         # find utility node to do calculations
         if node['type'] == 'utility':
-            pars = parents(node, net, chanceValues)
+            pars = parents(node, net, chanceValues, decisions)
             vals = [(row['val'], P(row, pars, decisions, chanceValues, net)) for row in node['CPT']]
             print 'Vals:', vals
             maxReward = max([v[0] for v in vals])
@@ -87,6 +94,17 @@ def probMaxReward(net, decisions, chanceValues):
             return r
     
 
+def matchChoice(net, decisions, chanceValues):
+    net = json.loads(net)
+    all_decisions = allDecisions(net)
+    # computes eu for each possible decision
+    eus = [calcUtility(json.dumps(net), json.dumps(d), chanceValues, False, False) for d in all_decisions]
+    # computes the eu for the given decision
+    choiceEU = calcUtility(json.dumps(net), decisions, chanceValues, False, False)
+
+    # return eu(d) / sum(all eus)
+    return float(choiceEU[0]) / float(sum([eu[0] for eu in eus]))
+
 def determinedChoice(net, decisions, chanceValues):
     net = json.loads(net)
     all_decisions = allDecisions(net)
@@ -94,15 +112,16 @@ def determinedChoice(net, decisions, chanceValues):
     eus = [calcUtility(json.dumps(net), json.dumps(d), chanceValues, False, False) for d in all_decisions]
     # computes the eu for the given decision
     choiceEU = calcUtility(json.dumps(net), decisions, chanceValues, False, False)
-    print '-------'
+    print '---DETERMINED----'
     print eus
+    print choiceEU
     # finds the max value for eu and u
-    t = (max([eu[0] for eu in eus]), max(u[1] for u in eus))
+    t = (max([eu[0] for eu in eus]), max([u[1] for u in eus]))
     print t
     # makes sure this decision maximizes eu and u
     # otherwise gives 0 because it is not a good decision
     if not (t[0] <= choiceEU[0]): # should never be less than...
-        print '(0, 0)'
+        print '(0, 0) SAD'
         return (0,0)
     # computes 1/ number of good decisions
     t2 = (1.0/[eu[0] for eu in eus].count(t[0]), 1.0/[u[1] for u in eus].count(t[1]))
@@ -110,8 +129,8 @@ def determinedChoice(net, decisions, chanceValues):
     return t2
     
 
-def parents(n, net, chanceValues):
-    # Assumed that no chance nodes have chance nodes as parents
+def parents(n, net, chanceValues, decisions):
+    # Assumed that no chance nodes have chance nodes as parents (probably not anymore... I think)
     # What if a chance node has a decision node as a parent and goes to anther decision node?
     possible = []
     for p in n['parents']:
@@ -124,7 +143,33 @@ def parents(n, net, chanceValues):
                    # update the CPT for this node because its value is known and set the 
                     # probability for that event to 1, all other events are not present because
                     # they do not matter
-                    n['CPT'] = [{'event':[n['name']+':'+chanceValues[n['name']]], 'prob': 1}]
+                    parentVals = set()
+                    tempPars = []
+                    for p2 in n['parents']:
+                        n2 = getNodeForid(p2, net['nodes'])
+                        tempPars.append(n2)
+                        if n2['type'] == 'decision':
+                            for r in n2['values']:
+                                parentVals.add(r)
+                        else:
+                            for r in n2['CPT']:
+                                for e in r['event']:
+                                    if e.split(':')[0] == n2['name']:
+                                        parentVals.add(e)
+                    tmpDct = dict(chanceValues.items() + decisions.items())
+                    if len(parentVals) == 0:
+                        tmpcpt = []
+                        for e in n['CPT']:
+                            if e['event'][0] != n['name']+':'+chanceValues[n['name']]:
+                                tmpcpt.append({'event':e['event'], 'prob':0})
+                        n['CPT'] = tmpcpt
+                        n['CPT'].append({'event':[n['name']+':'+chanceValues[n['name']]], 'prob': 1})
+                    else:
+                        tmpcpt = []
+                        for e in n['CPT']:
+                            if n['name']+':'+tmpDct[n['name']] not in e['event'] and tempPars[0]['name']+':'+tmpDct[tempPars[0]['name']] not in e['event']:
+                                tmpcpt.append({'event':e['event'], 'prob':0})
+                        n['CPT'].append({'event':[tempPars[0]['name']+':'+tmpDct[tempPars[0]['name']], n['name']+':'+tmpDct[n['name']]], 'prob': 1})
     return possible
 
 def P_row(node, row, parents, decisions):
@@ -170,7 +215,7 @@ def expectedUtility(net, decisions, chanceValues, debug=False):
     debugString = ''
     for node in net['nodes']:
         if node['type'] == 'utility':
-            pars = parents(node, net, chanceValues)
+            pars = parents(node, net, chanceValues, decisions)
             for row in node['CPT']:
                 valid = True
                 for tv in row['event']:
@@ -184,7 +229,7 @@ def expectedUtility(net, decisions, chanceValues, debug=False):
                         if len(pars) == 1:
                             summation += 1
                         continue
-                    pars2 = parents(p, net, chanceValues)
+                    pars2 = parents(p, net, chanceValues, decisions)
                     tmp = [v for v in row['event'] if v.split(':')[0] == p['name']][0]
                     for r2 in p['CPT']:
                         valid = True
@@ -198,11 +243,17 @@ def expectedUtility(net, decisions, chanceValues, debug=False):
                             for p2 in pars2:
                                 if p2['type'] == 'decision':
                                     continue
+                                #print p2['name'], r2['event'], p['name']#, p['CPT']
                                 tmp2 = [v for v in r2['event'] if v.split(':')[0] == p2['name']][0]
+                                #print p2['CPT']
                                 for r3 in p2['CPT']:
-                                    if tmp2 in r3['event']:
+                                    isValid = True
+                                    for tmpEvent in r3['event']:
+                                        if tmpEvent.split(':')[0] in decisions and decisions[tmpEvent.split(':')[0]] != tmpEvent.split(':')[1]:
+                                            isValid = False
+                                    if tmp2 in r3['event'] and isValid:
                                         prod *= r3['prob']
-                                        debugString += ' prod * '+str(r3['prob'])+'\n'
+                                        debugString += ' prod * '+str(r3['prob'])+'  '+str(r3['event'])+'\n'
                             summation += r2['prob'] * prod
                             debugString += ' + '+str(r2['prob'])+' * '+str(prod)
                             debugString += ' = '+str(r2['prob']*prod)+'\n'
@@ -256,6 +307,7 @@ def evaluateNode(node, nodes, decisions, chanceValues):
         # don't evaluate utilty here
         pass
     cpt = []
+                                        
     for p in node['parents']:
         # for each parent
         parent = getNodeForid(p,nodes)
@@ -905,8 +957,28 @@ if __name__ == '__main__':
         det = determinedChoice(sys.argv[1], sys.argv[2], sys.argv[3])
         complexity = complexity(json.loads(sys.argv[1]))
         pMax = probMaxReward(sys.argv[1], sys.argv[2], sys.argv[3])
+        mchoice = matchChoice(sys.argv[1], sys.argv[2], sys.argv[3])
+
+        print ' '
         print '(EU, U) =', us
         print 'Determined:', det
         print 'Complexity:', complexity
         print 'P(maxReward | d) =', pMax
+        print 'P(proportional_choice | net) =', mchoice
+        
+        print ' ' 
+        print 'P1'
+        print 'P(max_choice | net) * P(net_no_knowedge) ='
+        print det[0], '* 1 /', complexity[0], '=', det[0], '*', 1.0/complexity[0], '=', det[0]*(1.0/complexity[0])
+        
+        print 'P2'
+        print 'P(max_choice | net) * P(net_knowledge) ='
+        print det[0], '* 1 /', complexity[1], '=', det[0], '*', 1.0/complexity[1], '=', det[0]*(1.0/complexity[1])
 
+        print 'P3'
+        print 'P(proportional_choice | net) * P(net_no_knowledge) ='
+        print mchoice, '* 1 /', complexity[0], '=', mchoice, '*', 1.0/complexity[0], '=', mchoice*(1.0/complexity[0])
+        
+        print 'P4'
+        print 'P(proportional_choice | net) * P(net_knowedge) ='
+        print mchoice, '* 1 /', complexity[1], '=', mchoice, '*', 1.0/complexity[1], '=', mchoice*(1.0/complexity[1])

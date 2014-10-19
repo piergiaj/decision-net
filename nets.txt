@@ -1,0 +1,218 @@
+The die was DRAWN RANDOMLY from the bowl. The player DID see which die was drawn and DID see the result of the roll before choosing a color.
+
+{"nodes":[{"id":0,"type":"chance","name":"die","CPT":[{"event":["die:A"],"prob":0.1666},{"event":["die:B"],"prob":0.1666},{"event":["die:C"],"prob":0.1666},{"event":["die:D"],"prob":0.1666},{"event":["die:E"],"prob":0.1666},{"event":["die:F"],"prob":0.1666}],"parents":[]},{"id":1,"type":"chance","name":"roll","CPT":[{"event":["die:A","roll:R"],"prob":0},{"event":["die:A","roll:B"],"prob":1},{"event":["die:B","roll:R"],"prob":0.1},{"event":["die:B","roll:B"],"prob":0.9},{"event":["die:C","roll:R"],"prob":0.2},{"event":["die:C","roll:B"],"prob":0.8},{"event":["die:D","roll:R"],"prob":0.3},{"event":["die:D","roll:B"],"prob":0.7},{"event":["die:E","roll:R"],"prob":0.4},{"event":["die:E","roll:B"],"prob":0.6},{"event":["die:F","roll:R"],"prob":0.5},{"event":["die:F","roll:B"],"prob":0.5}],"parents":[0]},{"id":2,"type":"decision","name":"d","parents":[0,1],"values":["B","R"]},{"id":3,"type":"utility","name":"u","CPT":[{"event":["roll:B","d:B"],"val":1},{"event":["roll:R","d:B"],"val":0}, {"event":["roll:B", "d:R"], "val":0}, {"event":["roll:R", "d:R"], "val":1}],"parents":[1,2]}]}
+
+Roll Blue:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P2
+P(max_choice | net) * P(net_knowledge) =
+1.0 * 1 / 26 = 1.0 * 0.0384615384615 = 0.0384615384615
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+1 * 1 / 18 = 1 * 0.0555555555556 = 0.0555555555556
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+1 * 1 / 26 = 1 * 0.0384615384615 = 0.0384615384615
+
+All the same because the roll is known.
+
+Roll Red: all 0 because you guessed wrong.
+
+
+
+
+
+The die was DRAWN RANDOMLY from the bowl. The player DID NOT see which die was drawn but DID see the result of the roll before choosing a color.
+
+{"nodes":[{"id":0,"type":"chance","name":"die","CPT":[{"event":["die:A"],"prob":0.1666},{"event":["die:B"],"prob":0.1666},{"event":["die:C"],"prob":0.1666},{"event":["die:D"],"prob":0.1666},{"event":["die:E"],"prob":0.1666},{"event":["die:F"],"prob":0.1666}],"parents":[]},{"id":1,"type":"chance","name":"roll","CPT":[{"event":["die:A","roll:R"],"prob":0},{"event":["die:A","roll:B"],"prob":1},{"event":["die:B","roll:R"],"prob":0.1},{"event":["die:B","roll:B"],"prob":0.9},{"event":["die:C","roll:R"],"prob":0.2},{"event":["die:C","roll:B"],"prob":0.8},{"event":["die:D","roll:R"],"prob":0.3},{"event":["die:D","roll:B"],"prob":0.7},{"event":["die:E","roll:R"],"prob":0.4},{"event":["die:E","roll:B"],"prob":0.6},{"event":["die:F","roll:R"],"prob":0.5},{"event":["die:F","roll:B"],"prob":0.5}],"parents":[0]},{"id":2,"type":"decision","name":"d","parents":[1],"values":["B","R"]},{"id":3,"type":"utility","name":"u","CPT":[{"event":["roll:B","d:B"],"val":1},{"event":["roll:R","d:B"],"val":0}, {"event":["roll:B", "d:R"], "val":0}, {"event":["roll:R", "d:R"], "val":1}],"parents":[1,2]}]}
+
+Roll Blue:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P2
+P(max_choice | net) * P(net_knowledge) =
+1.0 * 1 / 20 = 1.0 * 0.05 = 0.05
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+1.0 * 1 / 20 = 1.0 * 0.05 = 0.05
+
+All the same because roll is known.
+
+Roll Red: All 0 because you guessed wrong.
+
+
+
+
+The die was DRAWN RANDOMLY from the bowl. The player DID see which die was drawn but DID NOT see the result of the roll before choosing a color.
+
+{"nodes":[{"id":0,"type":"chance","name":"die","CPT":[{"event":["die:A"],"prob":0.1666},{"event":["die:B"],"prob":0.1666},{"event":["die:C"],"prob":0.1666},{"event":["die:D"],"prob":0.1666},{"event":["die:E"],"prob":0.1666},{"event":["die:F"],"prob":0.1666}],"parents":[]},{"id":1,"type":"chance","name":"roll","CPT":[{"event":["die:A","roll:R"],"prob":0},{"event":["die:A","roll:B"],"prob":1},{"event":["die:B","roll:R"],"prob":0.1},{"event":["die:B","roll:B"],"prob":0.9},{"event":["die:C","roll:R"],"prob":0.2},{"event":["die:C","roll:B"],"prob":0.8},{"event":["die:D","roll:R"],"prob":0.3},{"event":["die:D","roll:B"],"prob":0.7},{"event":["die:E","roll:R"],"prob":0.4},{"event":["die:E","roll:B"],"prob":0.6},{"event":["die:F","roll:R"],"prob":0.5},{"event":["die:F","roll:B"],"prob":0.5}],"parents":[0]},{"id":2,"type":"decision","name":"d","parents":[0],"values":["B","R"]},{"id":3,"type":"utility","name":"u","CPT":[{"event":["roll:B","d:B"],"val":1},{"event":["roll:R","d:B"],"val":0}, {"event":["roll:B", "d:R"], "val":0}, {"event":["roll:R", "d:R"], "val":1}],"parents":[1,2]}]}
+
+Roll Blue:
+Die A:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P2
+P(max_choice | net) * P(net_knowledge) =
+1.0 * 1 / 24 = 1.0 * 0.0416666666667 = 0.0416666666667
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+1.0 * 1 / 24 = 1.0 * 0.0416666666667 = 0.0416666666667
+
+Die C:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P2
+P(max_choice | net) * P(net_knowledge) =
+1.0 * 1 / 24 = 1.0 * 0.0416666666667 = 0.0416666666667
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.8 * 1 / 18 = 0.8 * 0.0555555555556 = 0.0444444444444
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.8 * 1 / 24 = 0.8 * 0.0416666666667 = 0.0333333333333
+
+Die F:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+0.5 * 1 / 18 = 0.5 * 0.0555555555556 = 0.0277777777778
+P2
+P(max_choice | net) * P(net_knowledge) =
+0.5 * 1 / 24 = 0.5 * 0.0416666666667 = 0.0208333333333
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.5 * 1 / 18 = 0.5 * 0.0555555555556 = 0.0277777777778
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.5 * 1 / 24 = 0.5 * 0.0416666666667 = 0.0208333333333
+
+
+
+The die was DRAWN RANDOMLY from the bowl. The player DID NOT see which die was drawn and DID NOT see the result of the roll before choosing a color.
+
+{"nodes":[{"id":0,"type":"chance","name":"die","CPT":[{"event":["die:A"],"prob":0.1666},{"event":["die:B"],"prob":0.1666},{"event":["die:C"],"prob":0.1666},{"event":["die:D"],"prob":0.1666},{"event":["die:E"],"prob":0.1666},{"event":["die:F"],"prob":0.1666}],"parents":[]},{"id":1,"type":"chance","name":"roll","CPT":[{"event":["die:A","roll:R"],"prob":0},{"event":["die:A","roll:B"],"prob":1},{"event":["die:B","roll:R"],"prob":0.1},{"event":["die:B","roll:B"],"prob":0.9},{"event":["die:C","roll:R"],"prob":0.2},{"event":["die:C","roll:B"],"prob":0.8},{"event":["die:D","roll:R"],"prob":0.3},{"event":["die:D","roll:B"],"prob":0.7},{"event":["die:E","roll:R"],"prob":0.4},{"event":["die:E","roll:B"],"prob":0.6},{"event":["die:F","roll:R"],"prob":0.5},{"event":["die:F","roll:B"],"prob":0.5}],"parents":[0]},{"id":2,"type":"decision","name":"d","parents":[],"values":["B","R"]},{"id":3,"type":"utility","name":"u","CPT":[{"event":["roll:B","d:B"],"val":1},{"event":["roll:R","d:B"],"val":0}, {"event":["roll:B", "d:R"], "val":0}, {"event":["roll:R", "d:R"], "val":1}],"parents":[1,2]}]}
+
+
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P2
+P(max_choice | net) * P(net_knowledge) =
+1.0 * 1 / 18 = 1.0 * 0.0555555555556 = 0.0555555555556
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.75 * 1 / 18 = 0.75 * 0.0555555555556 = 0.0416666666667
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.75 * 1 / 18 = 0.75 * 0.0555555555556 = 0.0416666666667
+
+All the same because nothing is known.
+
+
+
+The player CHOSE the die from the bowl. The player DID NOT see the result of the roll before choosing a color.
+
+{"nodes":[{"id":0,"type":"chance","name":"die","CPT":[{"event":["dieChoice:A","die:A"],"prob":1},{"event":["dieChoice:A","die:B"],"prob":0},{"event":["dieChoice:A","die:C"],"prob":0},{"event":["dieChoice:A","die:D"],"prob":0},{"event":["dieChoice:A","die:E"],"prob":0},{"event":["dieChoice:A","die:F"],"prob":0},{"event":["dieChoice:B","die:A"],"prob":0},{"event":["dieChoice:B","die:B"],"prob":1},{"event":["dieChoice:B","die:C"],"prob":0},{"event":["dieChoice:B","die:D"],"prob":0},{"event":["dieChoice:B","die:E"],"prob":0},{"event":["dieChoice:B","die:F"],"prob":0},{"event":["dieChoice:C","die:A"],"prob":0},{"event":["dieChoice:C","die:B"],"prob":0},{"event":["dieChoice:C","die:C"],"prob":1},{"event":["dieChoice:C","die:D"],"prob":0},{"event":["dieChoice:C","die:E"],"prob":0},{"event":["dieChoice:C","die:F"],"prob":0},{"event":["dieChoice:D","die:A"],"prob":0},{"event":["dieChoice:D","die:B"],"prob":0},{"event":["dieChoice:D","die:C"],"prob":0},{"event":["dieChoice:D","die:D"],"prob":1},{"event":["dieChoice:D","die:E"],"prob":0},{"event":["dieChoice:D","die:F"],"prob":0},{"event":["dieChoice:E","die:A"],"prob":0},{"event":["dieChoice:E","die:B"],"prob":0},{"event":["dieChoice:E","die:C"],"prob":0},{"event":["dieChoice:E","die:D"],"prob":0},{"event":["dieChoice:E","die:E"],"prob":1},{"event":["dieChoice:E","die:F"],"prob":0},{"event":["dieChoice:F","die:A"],"prob":0},{"event":["dieChoice:F","die:B"],"prob":0},{"event":["dieChoice:F","die:C"],"prob":0},{"event":["dieChoice:F","die:D"],"prob":0},{"event":["dieChoice:F","die:E"],"prob":0},{"event":["dieChoice:F","die:F"],"prob":1}],"parents":[2]},{"id":1,"type":"chance","name":"roll","CPT":[{"event":["die:A","roll:R"],"prob":0},{"event":["die:A","roll:B"],"prob":1},{"event":["die:B","roll:R"],"prob":0.1},{"event":["die:B","roll:B"],"prob":0.9},{"event":["die:C","roll:R"],"prob":0.2},{"event":["die:C","roll:B"],"prob":0.8},{"event":["die:D","roll:R"],"prob":0.3},{"event":["die:D","roll:B"],"prob":0.7},{"event":["die:E","roll:R"],"prob":0.4},{"event":["die:E","roll:B"],"prob":0.6},{"event":["die:F","roll:R"],"prob":0.5},{"event":["die:F","roll:B"],"prob":0.5}],"parents":[0]},{"id":2,"type":"decision","name":"dieChoice","parents":[],"values":["A","B","C","D","E","F"]},{"id":3,"type":"decision","name":"rollChoice","parents":[0],"values":["B","R"]},{"id":4,"type":"utility","name":"u","CPT":[{"event":["roll:R","rollChoice:B"],"val":0},{"event":["roll:B","rollChoice:B"],"val":1}, {"event":["roll:B", "rollChoice:R"], "val":0}, {"event":["roll:R", "rollChoice:R"], "val":1}],"parents":[1,3]}]}
+
+Die A:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+0.5 * 1 / 48 = 0.5 * 0.0208333333333 = 0.0104166666667
+P2
+P(max_choice | net) * P(net_knowledge) =
+0.5 * 1 / 54 = 0.5 * 0.0185185185185 = 0.00925925925926
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.0833333333333 * 1 / 48 = 0.0833333333333 * 0.0208333333333 = 0.00173611111111
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.0833333333333 * 1 / 54 = 0.0833333333333 * 0.0185185185185 = 0.00154320987654
+
+Die C:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+0 * 1 / 48 = 0 * 0.0208333333333 = 0.0 (BECAUSE CHOOSING ANYTHING OTHER THAN A IS BAD)
+P2
+P(max_choice | net) * P(net_knowledge) =
+0 * 1 / 54 = 0 * 0.0185185185185 = 0.0
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.0666666666667 * 1 / 48 = 0.0666666666667 * 0.0208333333333 = 0.00138888888889
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.0666666666667 * 1 / 54 = 0.0666666666667 * 0.0185185185185 = 0.00123456790123
+
+Die F:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+0 * 1 / 48 = 0 * 0.0208333333333 = 0.0
+P2
+P(max_choice | net) * P(net_knowledge) =
+0 * 1 / 54 = 0 * 0.0185185185185 = 0.0
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.0416666666667 * 1 / 48 = 0.0416666666667 * 0.0208333333333 = 0.000868055555556
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.0416666666667 * 1 / 54 = 0.0416666666667 * 0.0185185185185 = 0.000771604938272
+
+
+
+The player CHOSE the die from the bowl. The player DID see the result of the roll before choosing a color.
+
+{"nodes":[{"id":0,"type":"chance","name":"die","CPT":[{"event":["dieChoice:A","die:A"],"prob":1},{"event":["dieChoice:A","die:B"],"prob":0},{"event":["dieChoice:A","die:C"],"prob":0},{"event":["dieChoice:A","die:D"],"prob":0},{"event":["dieChoice:A","die:E"],"prob":0},{"event":["dieChoice:A","die:F"],"prob":0},{"event":["dieChoice:B","die:A"],"prob":0},{"event":["dieChoice:B","die:B"],"prob":1},{"event":["dieChoice:B","die:C"],"prob":0},{"event":["dieChoice:B","die:D"],"prob":0},{"event":["dieChoice:B","die:E"],"prob":0},{"event":["dieChoice:B","die:F"],"prob":0},{"event":["dieChoice:C","die:A"],"prob":0},{"event":["dieChoice:C","die:B"],"prob":0},{"event":["dieChoice:C","die:C"],"prob":1},{"event":["dieChoice:C","die:D"],"prob":0},{"event":["dieChoice:C","die:E"],"prob":0},{"event":["dieChoice:C","die:F"],"prob":0},{"event":["dieChoice:D","die:A"],"prob":0},{"event":["dieChoice:D","die:B"],"prob":0},{"event":["dieChoice:D","die:C"],"prob":0},{"event":["dieChoice:D","die:D"],"prob":1},{"event":["dieChoice:D","die:E"],"prob":0},{"event":["dieChoice:D","die:F"],"prob":0},{"event":["dieChoice:E","die:A"],"prob":0},{"event":["dieChoice:E","die:B"],"prob":0},{"event":["dieChoice:E","die:C"],"prob":0},{"event":["dieChoice:E","die:D"],"prob":0},{"event":["dieChoice:E","die:E"],"prob":1},{"event":["dieChoice:E","die:F"],"prob":0},{"event":["dieChoice:F","die:A"],"prob":0},{"event":["dieChoice:F","die:B"],"prob":0},{"event":["dieChoice:F","die:C"],"prob":0},{"event":["dieChoice:F","die:D"],"prob":0},{"event":["dieChoice:F","die:E"],"prob":0},{"event":["dieChoice:F","die:F"],"prob":1}],"parents":[2]},{"id":1,"type":"chance","name":"roll","CPT":[{"event":["die:A","roll:R"],"prob":0},{"event":["die:A","roll:B"],"prob":1},{"event":["die:B","roll:R"],"prob":0.1},{"event":["die:B","roll:B"],"prob":0.9},{"event":["die:C","roll:R"],"prob":0.2},{"event":["die:C","roll:B"],"prob":0.8},{"event":["die:D","roll:R"],"prob":0.3},{"event":["die:D","roll:B"],"prob":0.7},{"event":["die:E","roll:R"],"prob":0.4},{"event":["die:E","roll:B"],"prob":0.6},{"event":["die:F","roll:R"],"prob":0.5},{"event":["die:F","roll:B"],"prob":0.5}],"parents":[0]},{"id":2,"type":"decision","name":"dieChoice","parents":[],"values":["A","B","C","D","E","F"]},{"id":3,"type":"decision","name":"rollChoice","parents":[0,1],"values":["B", "R"]},{"id":4,"type":"utility","name":"u","CPT":[{"event":["roll:R","rollChoice:B"],"val":0},{"event":["roll:B","rollChoice:B"],"val":1}, {"event":["roll:B", "rollChoice:R"], "val":0}, {"event":["roll:R", "rollChoice:R"], "val":1}],"parents":[1,3]}]}
+
+
+DIE A:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+0.5 * 1 / 48 = 0.5 * 0.0208333333333 = 0.0104166666667
+P2
+P(max_choice | net) * P(net_knowledge) =
+0.5 * 1 / 56 = 0.5 * 0.0178571428571 = 0.00892857142857
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.142857142857 * 1 / 48 = 0.142857142857 * 0.0208333333333 = 0.00297619047619
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.142857142857 * 1 / 56 = 0.142857142857 * 0.0178571428571 = 0.00255102040816
+
+
+DIE C:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+0.5 * 1 / 48 = 0.5 * 0.0208333333333 = 0.0104166666667
+P2
+P(max_choice | net) * P(net_knowledge) =
+0.5 * 1 / 56 = 0.5 * 0.0178571428571 = 0.00892857142857
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.128571428571 * 1 / 48 = 0.128571428571 * 0.0208333333333 = 0.00267857142857
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.128571428571 * 1 / 56 = 0.128571428571 * 0.0178571428571 = 0.00229591836735
+
+
+DIE F:
+P1
+P(max_choice | net) * P(net_no_knowedge) =
+0.5 * 1 / 48 = 0.5 * 0.0208333333333 = 0.0104166666667
+P2
+P(max_choice | net) * P(net_knowledge) =
+0.5 * 1 / 56 = 0.5 * 0.0178571428571 = 0.00892857142857
+P3
+P(proportional_choice | net) * P(net_no_knowledge) =
+0.107142857143 * 1 / 48 = 0.107142857143 * 0.0208333333333 = 0.00223214285714
+P4
+P(proportional_choice | net) * P(net_knowedge) =
+0.107142857143 * 1 / 56 = 0.107142857143 * 0.0178571428571 = 0.00191326530612

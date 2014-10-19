@@ -1,0 +1,28 @@
+TODO: 
+1. Set up database
+2. Send data to database
+3. Test
+4. Show others
+5. Calculate predictions
+6. Read paper
+
+
+Info Table:
+id |      die      explanations         cases            names
+--------------------------------------------------------------------
+ 0 | '[diceArray]'  '[expArray]'     '[caseArray]'    '[nameArray]'
+...
+
+
+Respose Table:
+id |     response1       response2         ...         response12
+------------------------------------------------------------------------
+ 0 | '[7,3,...,txt]'  '[4,3,...,txt]' ............. '[4, 3, ... txt]'
+...
+
+
+HIT Table:
+id | HIT Code
+-------------------
+ 0 | 'some string'
+...

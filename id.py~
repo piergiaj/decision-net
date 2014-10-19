@@ -9,7 +9,7 @@ def numberOfVals(node):
     used = []
     if node['type'] == 'decision':
         # if it is a decision node, simply the length of values
-        return len(node['values'])
+        return max(2,len(node['values']))
     elif node['type'] == 'utility':
         # if a utility node, simply rows of table
         return len(node['CPT'])
@@ -28,23 +28,30 @@ def numberOfVals(node):
 def complexity(ID):
     # calculates complexity according to sum((valsNode-1)*valsParents for all nodes)
     val = 0
+    val2 = 0
     eq = ''
+    eq2 = ''
     # for each node
     for node in ID['nodes']:
         q = 0
+        q2 = 0
         for p in node['parents']:
             parent = getNodeForid(p, ID['nodes'])
             # if the node is a decision and its parent is chance, ignore the edge
             if node['type'] == 'decision' and parent['type'] == 'chance': 
                 # ignore chance to decision edges
+                q2 += numberOfVals(parent)
                 continue
             # get the number of values for this parent
             q += numberOfVals(parent)
         eq += '('+str(numberOfVals(node))+'-1) * '+str(q)+' + '
+        eq2 += '('+str(numberOfVals(node))+'-1) * '+str(q+q2)+' + '
         # compute the complexity of this node
         val += (numberOfVals(node)-1)*q
+        val2 += (numberOfVals(node)-1)*(q+q2)
     print eq[:-1]+' = '+str(val)
-    return val
+    print eq2[:-1]+' = '+str(val2)
+    return (val, val2)
 
 
 def allDecisions(net):
@@ -64,6 +71,8 @@ def allDecisions(net):
                         td2 = copy.deepcopy(td)
                         td2[d2[0]] = v2
                         allDec.append(td2)
+                elif len(decisions) == 1:
+                    allDec.append(td)
             if len(allDec) == 0:
                 allDec.append({decision[0]: v})
     return allDec
@@ -109,7 +118,7 @@ def determinedChoice(net, decisions, chanceValues):
     
 
 def parents(n, net, chanceValues):
-    # Assumed that no chance nodes have chance nodes as parents
+    # Assumed that no chance nodes have chance nodes as parents (probably not anymore... I think)
     # What if a chance node has a decision node as a parent and goes to anther decision node?
     possible = []
     for p in n['parents']:
@@ -122,7 +131,17 @@ def parents(n, net, chanceValues):
                    # update the CPT for this node because its value is known and set the 
                     # probability for that event to 1, all other events are not present because
                     # they do not matter
-                    n['CPT'] = [{'event':[n['name']+':'+chanceValues[n['name']]], 'prob': 1}]
+                    parentVals = set()
+                    for p2 in n['parents']:
+                        n2 = getNodeForid(p2, net['nodes'])
+                        for r in n2['CPT']:
+                            for e in r['event']:
+                                if e.split(':')[0] == n2['name']:
+                                    parentVals.add(e)
+                    if len(parentVals) == 0:
+                        n['CPT'] = [{'event':[n['name']+':'+chanceValues[n['name']]], 'prob': 1}]
+                    else:
+                        n['CPT'] = [{'event':[pv, n['name']+':'+chanceValues[n['name']]], 'prob': 1} for pv in parentVals]
     return possible
 
 def P_row(node, row, parents, decisions):
@@ -179,13 +198,24 @@ def expectedUtility(net, decisions, chanceValues, debug=False):
                 summation = 0
                 for p in pars:
                     if p['type'] == 'decision':
+                        if len(pars) == 1:
+                            summation += 1
                         continue
                     pars2 = parents(p, net, chanceValues)
                     tmp = [v for v in row['event'] if v.split(':')[0] == p['name']][0]
                     for r2 in p['CPT']:
+                        valid = True
+                        for tv in r2['event']:
+                            if tv.split(':')[0] in decisions and decisions[tv.split(':')[0]] != tv.split(':')[1]:
+                                valid = False
+                        if not valid:
+                            continue
                         if tmp in r2['event']:
                             prod = 1
                             for p2 in pars2:
+                                if p2['type'] == 'decision':
+                                    continue
+                              #  print p2['name'], r2['event'], p['name'], p['CPT']
                                 tmp2 = [v for v in r2['event'] if v.split(':')[0] == p2['name']][0]
                                 for r3 in p2['CPT']:
                                     if tmp2 in r3['event']:
@@ -196,6 +226,7 @@ def expectedUtility(net, decisions, chanceValues, debug=False):
                             debugString += ' = '+str(r2['prob']*prod)+'\n'
                 debugString += 'eu += '+str(summation)+' * '+str(row['val'])+' = '+str(summation*row['val'])+'\n'
                 eu += summation*row['val']
+                debugString += 'EU = '+str(eu)+'\n'
     if debug:
         print debugString
     return eu
@@ -226,7 +257,7 @@ def getNodeForid(i, nodes):
 
 def evaluateNode(node, nodes, decisions, chanceValues):
     # finds the value of this node
-    if 'evaluated' in node:
+    if 'val' in node:
         # don't evaluate already evaluated nodes
         return node['val']
     for p in node['parents']:
@@ -274,10 +305,14 @@ def calcUtility(i,d,c,v=False, prnt=True):
     u = None
     for n in influenceDiagram['nodes']:
         if n['type'] == 'utility':
+            if 'val' not in n:
+                evaluateNode(n, influenceDiagram['nodes'], decisions, chanceValues)
+            print decisions, chanceValues
             u = n['val']
     # compute eu
     eu = expectedUtility(influenceDiagram, decisions, chanceValues, prnt)
-    eu2 = expectedUtility2(influenceDiagram, decisions, chanceValues, prnt)
+    print 'The utility is', eu
+    #eu2 = expectedUtility2(influenceDiagram, decisions, chanceValues, prnt)
     if v:
         print eu
         print 'EU2 =', eu2
@@ -308,7 +343,8 @@ def test():
     net9 = '{"nodes":[{"id":0,"type":"chance","name":"c","CPT":[{"event":["c:T"],"prob":0.6},{"event":["c:F"],"prob":0.4}],"parents":[]},{"id":1,"type":"decision","name":"d","parents":[0],"values":["T","F"]},{"id":2,"type":"utility","name":"u","CPT":[{"event":["c:T","d:T"],"val":1},{"event":["c:T","d:F"],"val":0},{"event":["c:F","d:T"],"val":0},{"event":["c:F","d:F"],"val":1}],"parents":[0,1]}]}'
     net10 = '{"nodes":[{"id":0,"type":"chance","name":"c","CPT":[{"event":["d:T","c:T"],"prob":0.6},{"event":["d:T","c:F"],"prob":0.4},{"event":["d:F","c:T"],"prob":0.7},{"event":["d:F","c:F"],"prob":0.3}],"parents":[1]},{"id":1,"type":"decision","name":"d","parents":[],"values":["T","F"]},{"id":2,"type":"utility","name":"u","CPT":[{"event":["d:T","c:T"],"val":2},{"event":["d:T","c:F"],"val":3},{"event":["d:F","c:T"],"val":2},{"event":["d:F","c:F"],"val":4}],"parents":[1,0]}]}'
 
-    net11 = '{"nodes":[{"id":0,"type":"chance","name":"roll","CPT":[{"event":["dice:A","roll:R"],"prob":0.6},{"event":["dice:A","roll:G"],"prob":0.2},{"event":["dice:A","roll:Y"],"prob":0.2},{"event":["dice:B","roll:R"],"prob":0.5},{"event":["dice:B","roll:G"],"prob":0.4},{"event":["dice:B","roll:Y"],"prob":0.1},{"event":["dice:C","roll:R"],"prob":0.2},{"event":["dice:C","roll:G"],"prob":0.3},{"event":["dice:C","roll:Y"],"prob":0.5}],"parents":[1]},{"id":1,"type":"decision","name":"dice","parents":[],"values":["A","B","C"]},{"id":2,"type":"decision","name":"color","parents":[],"values":["R","G","Y"]},{"id":3,"type":"utility","name":"u","CPT":[{"event":["roll:R","dice:A","color:R"],"val":1},{"event":["roll:R","dice:A","color:G"],"val":0},{"event":["roll:R","dice:A","color:Y"],"val":0},{"event":["roll:R","dice:B","color:R"],"val":1},{"event":["roll:R","dice:B","color:G"],"val":0},{"event":["roll:R","dice:B","color:Y"],"val":0},{"event":["roll:R","dice:C","color:R"],"val":1},{"event":["roll:R","dice:C","color:B"],"val":0},{"event":["roll:R","dice:C","color:Y"],"val":0},{"event":["roll:G","dice:A","color:R"],"val":0},{"event":["roll:G","dice:A","color:G"],"val":1},{"event":["roll:G","dice:A","color:Y"],"val":0},{"event":["roll:G","dice:B","color:R"],"val":0},{"event":["roll:G","dice:B","color:G"],"val":1},{"event":["roll:G","dice:B","color:Y"],"val":0},{"event":["roll:G","dice:C","color:R"],"val":0},{"event":["roll:G","dice:C","color:G"],"val":1},{"event":["roll:G","dice:C","color:Y"],"val":0},{"event":["roll:Y","dice:A","color:R"],"val":0},{"event":["roll:Y","dice:A","color:G"],"val":0},{"event":["roll:Y","dice:A","color:Y"],"val":1},{"event":["roll:Y","dice:B","color:R"],"val":0},{"event":["roll:Y","dice:B","color:G"],"val":0},{"event":["roll:Y","dice:B","color:Y"],"val":1},{"event":["roll:Y","dice:C","color:R"],"val":0},{"event":["roll:Y","dice:C","color:G"],"val":0},{"event":["roll:Y","dice:C","color:Y"],"val":1}],"parents":[0,1,2]}]}'
+    net11 = '{"nodes":[{"id":0,"type":"chance","name":"roll","CPT":[{"event":["dice:A","roll:R"],"prob":0.6},{"event":["dice:A","roll:G"],"prob":0.2},{"event":["dice:A","roll:Y"],"prob":0.2},{"event":["dice:B","roll:R"],"prob":0.5},{"event":["dice:B","roll:G"],"prob":0.4},{"event":["dice:B","roll:Y"],"prob":0.1},{"event":["dice:C","roll:R"],"prob":0.2},{"event":["dice:C","roll:G"],"prob":0.3},{"event":["dice:C","roll:Y"],"prob":0.5}],"parents":[1]},{"id":1,"type":"decision","name":"dice","parents":[],"values":["A","B","C"]},{"id":2,"type":"decision","name":"color","parents":[],"values":["R","G","Y"]},{"id":3,"type":"utility","name":"u","CPT":[{"event":["roll:R","dice:A","color:R"],"val":1},{"event":["roll:R","dice:A","color:G"],"val":0},{"event":["roll:R","dice:A","color:Y"],"val":0},{"event":["roll:R","dice:B","color:R"],"val":1},{"event":["roll:R","dice:B","color:G"],"val":0},{"event":["roll:R","dice:B","color:Y"],"val":0},{"event":["roll:R","dice:C","color:R"],"val":1},{"event":["roll:R","dice:C","color:G"],"val":0},{"event":["roll:R","dice:C","color:Y"],"val":0},{"event":["roll:G","dice:A","color:R"],"val":0},{"event":["roll:G","dice:A","color:G"],"val":1},{"event":["roll:G","dice:A","color:Y"],"val":0},{"event":["roll:G","dice:B","color:R"],"val":0},{"event":["roll:G","dice:B","color:G"],"val":1},{"event":["roll:G","dice:B","color:Y"],"val":0},{"event":["roll:G","dice:C","color:R"],"val":0},{"event":["roll:G","dice:C","color:G"],"val":1},{"event":["roll:G","dice:C","color:Y"],"val":0},{"event":["roll:Y","dice:A","color:R"],"val":0},{"event":["roll:Y","dice:A","color:G"],"val":0},{"event":["roll:Y","dice:A","color:Y"],"val":1},{"event":["roll:Y","dice:B","color:R"],"val":0},{"event":["roll:Y","dice:B","color:G"],"val":0},{"event":["roll:Y","dice:B","color:Y"],"val":1},{"event":["roll:Y","dice:C","color:R"],"val":0},{"event":["roll:Y","dice:C","color:G"],"val":0},{"event":["roll:Y","dice:C","color:Y"],"val":1}],"parents":[0,1,2]}]}'
+    net12 = '{"nodes":[{"id":0,"type":"chance","name":"dice","CPT":[{"event":["dice:A"],"prob":0.33},{"event":["dice:B"],"prob":0.33},{"event":["dice:C"],"prob":0.34}],"parents":[]},{"id":1,"type":"chance","name":"roll","CPT":[{"event":["dice:A","roll:r"],"prob":0.5},{"event":["dice:A","roll:b"],"prob":0.5},{"event":["dice:B","roll:r"],"prob":0.7},{"event":["dice:B","roll:b"],"prob":0.3},{"event":["dice:C","roll:r"],"prob":0.9},{"event":["dice:C","roll:b"],"prob":0.1}],"parents":[0]},{"id":2,"type":"decision","name":"d","parents":[],"values":["r","b"]},{"id":3,"type":"utility","name":"u","CPT":[{"event":["roll:r","d:r"],"val":1},{"event":["roll:r","d:b"],"val":0},{"event":["roll:b","d:r"],"val":0},{"event":["roll:b","d:b"],"val":1}],"parents":[1,2]}]}'
     
     def testUtility():
         i = 1
@@ -421,7 +457,7 @@ def test():
         i += 1
         
         eu = calcUtility(net7, decisionTrue, chanceFalse, False)
-        expect(i, (1,0), eu)
+        expect(i, (0,0), eu)
         i += 1
         
         eu = calcUtility(net7, decisionFalse, chanceTrue, False)
@@ -429,7 +465,7 @@ def test():
         i += 1
         
         eu = calcUtility(net7, decisionFalse, chanceFalse, False)
-        expect(i, (1,0), eu)
+        expect(i, (0,0), eu)
         i += 1
         
         # net 8
@@ -455,11 +491,11 @@ def test():
         i += 1
         
         eu = calcUtility(net9, decisionTrue, chanceFalse, False)
-        expect(i, (1,0), eu)
+        expect(i, (0,0), eu)
         i += 1
         
         eu = calcUtility(net9, decisionFalse, chanceTrue, False)
-        expect(i, (1,0), eu)
+        expect(i, (0,0), eu)
         i += 1
         
         eu = calcUtility(net9, decisionFalse, chanceFalse, False)
@@ -486,6 +522,7 @@ def test():
         # net 11
         eu = calcUtility(net11, '{"dice":"A", "color":"R"}', '{"roll":"R"}', False)
         expect(i, (0.6, 1), eu)
+
     
     def testDetermined():
         i = 1
@@ -628,19 +665,19 @@ def test():
 
         # net 9
         val = determinedChoice(net9, decisionTrue, chanceTrue)
-        expect(i, (0.5, 1), val)
+        expect(i, (1, 1), val)
         i += 1
 
         val = determinedChoice(net9, decisionTrue, chanceFalse)
-        expect(i, (0.5, 1), val)
+        expect(i, (0, 0), val)
         i += 1
 
         val = determinedChoice(net9, decisionFalse, chanceTrue)
-        expect(i, (0.5, 1), val)
+        expect(i, (0,0), val)
         i += 1
 
         val = determinedChoice(net9, decisionFalse, chanceFalse)
-        expect(i, (0.5, 1), val)
+        expect(i, (1, 1), val)
         i += 1
 
         # net 10
@@ -661,7 +698,7 @@ def test():
         i += 1
 
         # net 11
-        val = determinedChoice(net11, '{dice:A, color:B}', '{roll:R}')
+        val = determinedChoice(net11, '{"dice":"A", "color":"G"}', '{"roll":"R"}')
 
     def testComplexity():
         i = 1
@@ -890,4 +927,19 @@ if __name__ == '__main__':
         print 'Determined:', det
         print 'Complexity:', complexity
         print 'P(maxReward | d) =', pMax
+        
+        print 'P1'
+        print 'P(max_choice | net) * P(net_no_knowedge) ='
+        print det[0], '* 1 /', complexity[0], '=', det[0], '*', 1.0/complexity[0], '=', det[0]*(1.0/complexity[0])
+        
+        print 'P2'
+        print 'P(max_choice | net) * P(net_knowledge) ='
+        print det[0], '* 1 /', complexity[1], '=', det[0], '*', 1.0/complexity[1], '=', det[0]*(1.0/complexity[1])
 
+        print 'P3'
+        print 'P(proportional_choice | net) * P(net_no_knowledge) ='
+        print us[0], '* 1 /', complexity[0], '=', us[0], '*', 1.0/complexity[0], '=', us[0]*(1.0/complexity[0])
+        
+        print 'P4'
+        print 'P(proportional_choice | net) * P(net_knowedge) ='
+        print us[0], '* 1 /', complexity[1], '=', us[0], '*', 1.0/complexity[1], '=', us[0]*(1.0/complexity[1])
