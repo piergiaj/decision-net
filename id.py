@@ -952,6 +952,8 @@ if __name__ == '__main__':
         tst[2]()
     elif sys.argv[1] == 'testMaxProb':
         tst[3]()
+    elif sys.argv[1] == 'calcComplexity':
+        print complexity(json.loads(sys.argv[2]))
     else:
         us = calcUtility(sys.argv[1], sys.argv[2], sys.argv[3])
         det = determinedChoice(sys.argv[1], sys.argv[2], sys.argv[3])
