@@ -1,4 +1,4 @@
 decision-net
 ============
 
-Decision Net Research
+Decision Net Project

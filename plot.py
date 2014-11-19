@@ -652,6 +652,57 @@ def exp4_full_scatter(predictions, complexity, utility):
     fig.set_size_inches(20,5)
     plt.savefig('plot_scatter_exp4.png', dpi=100, bbox_inches='tight')
     plt.close(fig)
+
+
+def plot_generate():
+    case_1 = np.asarray([0,7,0,2,1,4,0,0,0,0,0,0,0,0]).cumsum() / 15.0
+    case_2 = np.asarray([0,9,3,0,1,1,0,0,1,0,0,0,0,0]).cumsum() / 15.0
+    case_3 = np.asarray([0,0,0,9,1,0,1,0,0,0,0,0,0,0]).cumsum() / 15.0
+    case_4 = np.asarray([0,8,6,0,0,0,1,0,0,0,0,0,0,0]).cumsum() / 15.0
+
+    fig, axes = plt.subplots(1,1)
+    #fig.suptitle('Model predictions compared to generated responses', fontsize=18, fontweight='bold')
+    axes.plot(np.arange(14), case_1, color='r', linestyle='-')
+    axes.set_ylabel('Percent accounted for')
+    axes.set_xlabel('Number of best explanations used')
+    axes.set_ylim(0,1.1)
+    axes.set_xlim(0,13)
+    fig.set_size_inches(5,5)
+    plt.savefig('plot_generate_case1.png', dpi=100, bbox_inches='tight')
+    plt.close(fig)
+  
+    fig, axes = plt.subplots(1,1)
+    #fig.suptitle('Model predictions compared to generated responses', fontsize=18, fontweight='bold')
+    axes.plot(np.arange(14), case_2, color='r', linestyle='-')
+    axes.set_ylabel('Percent accounted for')
+    axes.set_xlabel('Number of best explanations used')
+    axes.set_ylim(0,1.1)
+    axes.set_xlim(0,13)
+    fig.set_size_inches(5,5)
+    plt.savefig('plot_generate_case2.png', dpi=100, bbox_inches='tight')
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1,1)
+    #fig.suptitle('Model predictions compared to generated responses', fontsize=18, fontweight='bold')
+    axes.plot(np.arange(14), case_3, color='r', linestyle='-')
+    axes.set_ylabel('Percent accounted for')
+    axes.set_xlabel('Number of best explanations used')
+    axes.set_ylim(0,1.1)
+    axes.set_xlim(0,13)
+    fig.set_size_inches(5,5)
+    plt.savefig('plot_generate_case3.png', dpi=100, bbox_inches='tight')
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1,1)
+   # fig.suptitle('Model predictions compared to generated responses', fontsize=18, fontweight='bold')
+    axes.plot(np.arange(14), case_4, color='r', linestyle='-')
+    axes.set_ylabel('Percent accounted for')
+    axes.set_xlabel('Number of best explanations used')
+    axes.set_ylim(0,1.1)
+    axes.set_xlim(0,13)
+    fig.set_size_inches(5,5)
+    plt.savefig('plot_generate_case4.png', dpi=100, bbox_inches='tight')
+    plt.close(fig)
     
 if __name__ == '__main__':
-    exp4()
+    plot_generate()
