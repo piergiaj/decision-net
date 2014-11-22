@@ -207,11 +207,11 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
     plt.savefig('plots/plot_scatter_exp_case'+str(ind)+'_'+fn+'.png', dpi=100, bbox_inches='tight')
     plt.close(fig)
 
-def exp4_full_scatter(predictions, complexity, utility):
+def exp_full_scatter(predictions, complexity, utility):
     """
     generates the full scatter plot for all 4 cases in one plot
     """
-    survey_data = get_exp4_data()
+    survey_data = get_exp_data()
 
     # sets up the model predictions
     predictions = np.concatenate((predictions[0] / predictions[0].sum(), predictions[1] / predictions[1].sum(), predictions[2] / predictions[2].sum(), predictions[3] / predictions[3].sum()))
@@ -233,33 +233,39 @@ def exp4_full_scatter(predictions, complexity, utility):
     
     
     cor = corr(data[0], mean)
-    axes[0].errorbar(mean, data[0], xerr=stderr, linestyle='')
-    axes[0].plot(mean, data[0], color='r', label='Corr = %0.4f' % cor, marker = 'o', 
-                     linestyle='')
-    axes[0].set_ylabel('Complexity Values')        
-    axes[0].set_title('Complexity Vs. Survey Data')
-    axes[0].set_xlabel('Survey Data')
-    axes[0].legend(loc='upper left', fancybox=True, 
-                   shadow=True, ncol=4, fontsize='small')
+    axes[0].errorbar(data[0], mean, xerr=stderr, linestyle='')
+    axes[0].plot(mean, data[0], color='r', marker = 'o', 
+                     linestyle='') #, label='Corr = %0.4f' % cor)
+    axes[0].set_xlabel('Model Predictions')        
+    axes[0].set_title('Simplicity Model')
+    axes[0].set_ylabel('Human Judgments')
+    axes[0].set_xlim(0, 0.2)
+    axes[0].set_ylim(0, 0.2)
+#    axes[0].legend(loc='upper left', fancybox=True, 
+ #                  shadow=True, ncol=4, fontsize='small')
     
     
     cor = corr(data[1], mean)
-    axes[1].errorbar(mean, data[1], xerr=stderr, linestyle='')
-    axes[1].plot(mean, data[1], color='r', label='Corr = %0.4f' % cor, marker = 'o', linestyle='')
-    axes[1].set_ylabel('Utility')        
-    axes[1].set_title('Utility vs Survey Data')
-    axes[1].set_xlabel('Survey Data')
-    axes[1].legend(loc='upper left', fancybox=True, 
-                   shadow=True, ncol=4, fontsize='small')
+    axes[1].errorbar(data[1], mean, xerr=stderr, linestyle='')
+    axes[1].plot(mean, data[1], color='r', marker = 'o', linestyle='') #label='Corr = %0.4f' % cor
+    axes[1].set_xlabel('Model Predictions')        
+    axes[1].set_title('Utility-only Model')
+    axes[1].set_ylabel('Human Judgments')
+    axes[1].set_xlim(0, 0.2)
+    axes[1].set_ylim(0, 0.2)
+#    axes[1].legend(loc='upper left', fancybox=True, 
+ #                  shadow=True, ncol=4, fontsize='small')
     
     cor = corr(data[2], mean)
-    axes[2].errorbar(mean, data[2], xerr=stderr, linestyle='')
-    axes[2].plot(mean, data[2], color='r', label='Corr = %0.4f' % cor, marker = 'o', linestyle='')
-    axes[2].set_ylabel('Combined')        
-    axes[2].set_title('Combined vs Survey Data')
-    axes[2].set_xlabel('Survey Data')
-    axes[2].legend(loc='upper left', fancybox=True, 
-                   shadow=True, ncol=4, fontsize='small')
+    axes[2].errorbar(data[2], mean, xerr=stderr, linestyle='')
+    axes[2].plot(mean, data[2], color='r', marker = 'o', linestyle='') # label='Corr = %0.4f' % cor
+    axes[2].set_xlabel('Model Predictions')        
+    axes[2].set_title('Decision Net Model')
+    axes[2].set_ylabel('Human Judgments')
+    axes[2].set_xlim(0, 0.2)
+    axes[2].set_ylim(0, 0.2)
+#    axes[2].legend(loc='upper left', fancybox=True, 
+  #                 shadow=True, ncol=4, fontsize='small')
     
     fig.set_size_inches(20,5)
     plt.savefig('plots/plot_scatter_exp.png', dpi=100, bbox_inches='tight')
