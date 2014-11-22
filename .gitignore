@@ -1,4 +1,5 @@
 paper/
+plots/
 *.pdf
 *.pyc
 *.zip
