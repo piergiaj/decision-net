@@ -1,6 +1,6 @@
 decision-net
 ============
-# ${1:Decision Net}
+# Decision Net
 Decision nets used as a computation model for how people explain behavior.
 
  
