@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 
+def turnTopRightOff(ax):
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
 def corr(x,y):
     """
     Computes the correlation between x and y
@@ -23,12 +29,12 @@ def get_exp_data():
         Normalizes the data per user so that it sums to one and
         can be more easily compared to the model predictions.
         """
-        for i in range(len(d[0])): # for each user
-            ut = 0.0
-            for j in range(len(d)): # for each entry
-                ut += d[j][i]
-            for j in range(len(d)): # update each value
-                d[j][i] = float(d[j][i]) / ut
+#        for i in range(len(d[0])): # for each user
+#            ut = 0.0
+#            for j in range(len(d)): # for each entry
+#                ut += d[j][i]
+#            for j in range(len(d)): # update each value
+#                d[j][i] = float(d[j][i]) / ut
         return d
 
     survey_data_x1 = normalize_survey_data(np.asarray(map(lambda x: map(lambda y: int(y), x), json.loads('[["7","7","5","2","7","7","3","6","7","7","5","1","4","7"],["2","7","6","2","7","2","3","6","7","5","5","1","4","7"],["6","7","6","5","7","6","4","6","7","6","4","1","5","7"],["6","7","5","6","7","7","4","6","7","7","5","1","4","5"],["6","7","4","3","7","5","3","6","7","4","3","1","4","6"],["2","7","4","6","7","2","3","6","6","4","3","1","1","5"],["6","7","4","4","7","7","4","6","7","6","3","1","4","5"],["1","7","6","7","1","1","1","1","1","1","1","1","1","1"],["2","7","4","7","2","1","2","6","3","3","2","1","1","1"],["6","1","6","2","3","2","3","6","4","4","4","1","4","3"],["5","1","6","7","2","5","3","6","5","5","3","1","1","3"],["1","1","3","5","1","1","2","6","1","2","2","1","1","2"],["2","1","1","5","1","1","1","2","3","1","1","1","1","1"]]')), dtype='float64'))
@@ -51,7 +57,7 @@ def get_exp_data():
     return sd
 
 
-def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, ind=1):
+def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, ind=1, model=''):
     """
     Generates the plots for the first experiment
     """
@@ -66,12 +72,12 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
     fn = 'x'+str(ind)
 
     # sets up the various model predictions used for this case
-    knowledge = knowledge / knowledge.sum()
-    no_knowledge = no_knowledge / no_knowledge.sum()
+    knowledge = knowledge*0 if knowledge.sum() == 0 else knowledge / knowledge.sum()
+    no_knowledge = no_knowledge*0 if no_knowledge.sum() == 0 else no_knowledge / no_knowledge.sum()
     predictions = (no_knowledge, knowledge)
     complexity = 1.0 / complexity
     complexity = complexity / complexity.sum()
-    utility = utility / utility.sum()
+    utility = utility*0 if utility.sum() == 0 else utility / utility.sum()
     
     # sets up the survey data for plotting
     sumTotal = survey_data.sum(axis=1)
@@ -81,6 +87,8 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
 
     # plots the near and far exponential functions
     fig, ax = plt.subplots(1,2)
+    turnTopRightOff(ax[0])
+    turnTopRightOff(ax[1])
     ax[0].set_title('Near Function')
     ax[0].plot(np.arange(0,12,0.1), np.exp(-0.249 * np.arange(0,12,0.1)))
     ax[1].set_title('Far Function')
@@ -88,7 +96,7 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
     fig.set_size_inches(25,10)
         
     fig.suptitle('Utility Exp Functions', fontsize=18, fontweight='bold')
-    plt.savefig('plots/plot_utility_exp_functions.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_utility_exp_'+model+'functions.eps', dpi=100, bbox_inches='tight')
     
 
     # plots var plots for complexity, utility and combined metric for this case
@@ -99,13 +107,14 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
 
     for i in [0,1,2]:
 #        axe[i].errorbar([1,2,3,4,5,6,7,8,9,10,11,12,13], mean, yerr=std)
-        axes[i].bar(np.arange(13)+1, data[i], bar_width, color='#4D4D4D', label='Model Prediction')
+        axes[i].bar(np.arange(13)+1, data[i], bar_width, color='#4D4D4D', label='Model Probabilities')
         
        # for t in axes[i].get_yticklabels():
         #    t.set_color('r')
         axes[i].set_xlim(0,14)
 
-        ax2 = axes[i]#.twinx()
+        ax2 = axes[i].twinx()
+        turnTopRightOff(ax2)
         ax2.bar(np.arange(13)+1+bar_width, mean, bar_width, color='#F15854', label='Survey Data')
         ax2.errorbar(np.arange(13)+1+bar_width+0.15, mean, yerr=stderr,linestyle='', ecolor='#5DA5DA', capsize=3, elinewidth=3)
        # for t in ax2.get_yticklabels():
@@ -118,43 +127,70 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
         axes[i].set_xticks(np.arange(13)+1)
         axes[i].set_xticklabels(labels, rotation=75, fontsize=16)
 
-    fig.set_size_inches(20,5)
+    fig.set_size_inches(25,8)
         
     fig.suptitle('Case '+str(ind), fontsize=28, fontweight='bold')
-    plt.savefig('plots/plot_human_data_exp_'+fn+'.png', dpi=200, bbox_inches='tight')
+    plt.savefig('plots/plot_'+model+'human_data_exp_'+fn+'.eps', bbox_inches='tight')
 
 
+    def rearrange(lst):
+        lst2 = [lst[0], lst[1], lst[5], lst[7], lst[11], lst[2], lst[4],
+                lst[6], lst[8], lst[10], lst[12], lst[9], lst[3]]
+        return lst2
 
     # plots the model predictions for this case
     fig, axes = plt.subplots(1,1)
-    axes.bar(np.arange(13)+1, data[2], bar_width, color='#4D4D4D', label='Model Predictions')
+    turnTopRightOff(axes)
+    dtplt = rearrange(data[2])
+    axes.bar(np.arange(13)+1, dtplt, bar_width, color='#F15854', label='Mean Human Ratings')
+    axes.bar(np.arange(13)+1, dtplt, bar_width, color='#4D4D4D', label='Model Probabilities')
     axes.set_xlim(0,14)
+    axes.set_ylim(0,0.14)
 
-    ax2 = axes
-    ax2.bar(np.arange(13)+1+bar_width, mean, bar_width, color='#F15854', label='Survey Data')
-    ax2.errorbar(np.arange(13)+1+bar_width+0.15, mean, yerr=stderr,linestyle='', ecolor='#5DA5DA', capsize=3, elinewidth=3)
+    ax2 = axes.twinx()
+    turnTopRightOff(ax2)
+    ax2.spines['left'].set_color('none')
+    ax2.spines['right'].set_color('black')
+    ax2.spines['top'].set_color('none')
+    ax2.xaxis.set_ticks_position('bottom')
+    ax2.yaxis.set_ticks_position('right')
+    
+    meanPlt = rearrange(mean)
+    errPlt = rearrange(stderr)
+    ax2.bar(np.arange(13)+1+bar_width, meanPlt, bar_width, color='#F15854', label='Survey Data')
+    ax2.errorbar(np.arange(13)+1+bar_width+0.15, meanPlt, yerr=errPlt,linestyle='', ecolor='#5DA5DA', capsize=3, elinewidth=3)
     ax2.set_xlim(0,14)
 
     axes.set_xticks(np.arange(13)+1)
-    axes.set_xticklabels(labels, rotation=75, fontsize=16)
+    axes.set_xticklabels(rearrange(labels), rotation=75, fontsize=16)
 
-    
-    axes.legend(loc='upper right', fancybox=True, 
-                                   shadow=True, ncol=4, fontsize='small')
+    r = 'right'
+    if fn == 'x2':
+        axes.set_ylabel('Model Probabilities', fontsize=17)
+    elif fn == 'x4':
+        ax2.set_ylabel('Mean Human Ratings', fontsize=17)
+        r = 'left'
 
-    fig.set_size_inches(5,5)
+    axes.legend(loc='upper '+r, fancybox=True, 
+                                   shadow=True, ncol=4, fontsize=12)
+
+    fig.set_size_inches(10,8)
         
-    fig.suptitle('Case '+str(ind), fontsize=28, fontweight='bold')
-    plt.savefig('plots/plot_human_data_exp_case'+str(ind)+'_'+fn+'.png', dpi=100, bbox_inches='tight')
+ #   fig.suptitle('Case '+str(ind), fontsize=28, fontweight='bold')
+    plt.savefig('plots/plot_human_data_'+model+'exp_case'+str(ind)+'_'+fn+'.eps', bbox_inches='tight')
     plt.close(fig)
 
 
     # Shows the scatter plot for complexity, utility and combined for this case
     fig, axes = plt.subplots(1,3)
-    fig.suptitle('Model Predictions vs. Human Data', fontsize=20, fontweight='bold')
+    turnTopRightOff(axes[0])
+    turnTopRightOff(axes[1])
+    turnTopRightOff(axes[2])
+    fig.suptitle('Model Probabilities vs. Human Data', fontsize=20, fontweight='bold')
     
 
     cor = corr(data[0], mean)
+    print 'Correlation (simp) for',ind,'is',cor
     axes[0].errorbar(mean, data[0], xerr=stderr, linestyle='')
     axes[0].plot(mean, data[0], color='r', label='Corr = %0.4f' % cor, marker = 'o', 
                  linestyle='')
@@ -166,6 +202,7 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
 
 
     cor = corr(data[1], mean)
+    print 'Correlation (ut) for',ind,'is',cor
     axes[1].errorbar(mean, data[1], xerr=stderr, linestyle='')
     axes[1].plot(mean, data[1], color='r', label='Corr = %0.4f' % cor, marker = 'o', linestyle='')
     axes[1].set_ylabel('Utility', color='g')        
@@ -175,6 +212,7 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
                                    shadow=True, ncol=4, fontsize='small')
 
     cor = corr(data[2], mean)
+    print 'Correlation (md) for',ind,'is',cor
     axes[2].errorbar(mean, data[2], xerr=stderr, linestyle='')
     axes[2].plot(mean, data[2], color='r', label='Corr = %0.4f' % cor, marker = 'o', linestyle='')
     axes[2].set_ylabel('Combined', color='g')        
@@ -184,11 +222,12 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
                                    shadow=True, ncol=4, fontsize='small')
 
     fig.set_size_inches(20,5)
-    plt.savefig('plots/plot_scatter_exp_'+fn+'.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_scatter_'+model+'exp_'+fn+'.eps', bbox_inches='tight')
     plt.close(fig)
 
     # Model predictions vs. data for this case
     fig, axes = plt.subplots(1,1)
+    turnTopRightOff(axes)
     fig.suptitle('Case '+str(ind), fontsize=20, fontweight='bold')
     
 
@@ -196,79 +235,107 @@ def exp_plot(knowledge=None, no_knowledge=None, complexity=None, utility=None, i
     axes.errorbar(mean, data[2], xerr=stderr, linestyle='')
     axes.plot(mean, data[2], color='r', label='Corr = %0.4f' % cor, marker = 'o', 
                  linestyle='')
-    axes.set_ylabel('Model Predictions', color='g')        
-    axes.set_title('Model Predictions Vs. Survey Data')
+    axes.set_ylabel('Model Probabilities', color='g')        
+    axes.set_title('Model Probabilities Vs. Survey Data')
     axes.set_xlabel('Survey Data')
     axes.legend(loc='upper left', fancybox=True, 
                                    shadow=True, ncol=4, fontsize='small')
 
 
     fig.set_size_inches(5,5)
-    plt.savefig('plots/plot_scatter_exp_case'+str(ind)+'_'+fn+'.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_scatter_'+model+'exp_case'+str(ind)+'_'+fn+'.eps', bbox_inches='tight')
     plt.close(fig)
 
-def exp_full_scatter(predictions, complexity, utility):
+def exp_full_scatter(predictions, complexity, utility, model=''):
     """
     generates the full scatter plot for all 4 cases in one plot
     """
     survey_data = get_exp_data()
 
     # sets up the model predictions
-    predictions = np.concatenate((predictions[0] / predictions[0].sum(), predictions[1] / predictions[1].sum(), predictions[2] / predictions[2].sum(), predictions[3] / predictions[3].sum()))
+#    predictions = np.concatenate((predictions[0] / predictions[0].sum(), predictions[1] / predictions[1].sum(), predictions[2] / predictions[2].sum(), predictions[3] / predictions[3].sum()))
+
+    predictions = np.concatenate((0*predictions[1] if predictions[1].sum() == 0 else predictions[1] / predictions[1].sum(), 0*predictions[2] if predictions[2].sum() == 0 else predictions[2] / predictions[2].sum(), 0*predictions[3] if predictions[3].sum() == 0 else predictions[3] / predictions[3].sum()))
+
     
     complexity = 1.0 / complexity
-    complexity = np.concatenate((complexity[0] / complexity[0].sum(), complexity[1] / complexity[1].sum(), complexity[2] / complexity[2].sum(), complexity[3] / complexity[3].sum()))
-    utility = np.concatenate((utility[0] / utility[0].sum(), utility[1] / utility[1].sum(), utility[2] / utility[2].sum(), utility[3] / utility[3].sum()))
+#    complexity = np.concatenate((complexity[0] / complexity[0].sum(), complexity[1] / complexity[1].sum(), complexity[2] / complexity[2].sum(), complexity[3] / complexity[3].sum()))
+#    utility = np.concatenate((utility[0] / utility[0].sum(), utility[1] / utility[1].sum(), utility[2] / utility[2].sum(), utility[3] / utility[3].sum()))
+
+    complexity = np.concatenate((complexity[1] / complexity[1].sum(), complexity[2] / complexity[2].sum(), complexity[3] / complexity[3].sum()))
+    utility = np.concatenate((0*utility[1] if utility[1].sum() == 0 else utility[1] / utility[1].sum(), 0*utility[2] if utility[2].sum() == 0 else utility[2] / utility[2].sum(), 0*utility[3] if utility[3].sum() == 0 else utility[3] / utility[3].sum()))
+
 
     data = (complexity, utility, predictions)
 
     # sets up survey data
-    mean = np.concatenate((survey_data[0].mean(axis=1), survey_data[1].mean(axis=1), survey_data[2].mean(axis=1), survey_data[3].mean(axis=1)))
-    std = np.concatenate((survey_data[0].std(axis=1), survey_data[1].std(axis=1), survey_data[2].std(axis=1), survey_data[3].std(axis=1)))
+#    mean = np.concatenate((survey_data[0].mean(axis=1), survey_data[1].mean(axis=1), survey_data[2].mean(axis=1), survney_data[3].mean(axis=1)))
+    mean = np.concatenate((survey_data[1].mean(axis=1), survey_data[2].mean(axis=1), survey_data[3].mean(axis=1)))
+
+#    std = np.concatenate((survey_data[0].std(axis=1), survey_data[1].std(axis=1), survey_data[2].std(axis=1), survey_data[3].std(axis=1)))
+    std = np.concatenate((survey_data[1].std(axis=1), survey_data[2].std(axis=1), survey_data[3].std(axis=1)))
     stderr = std / np.sqrt(15)
 
     # scatter plot
-    fig, axes = plt.subplots(1,3)
-    fig.suptitle('Model Predictions vs. Human Data', fontsize=20, fontweight='bold')
+    #fig, axes = plt.subplots(1,3)
+    #fig.suptitle('Model Predictions vs. Human Data', fontsize=20, fontweight='bold')
     
-    
+    fig, axes = plt.subplots(1,1)
     cor = corr(data[0], mean)
-    axes[0].errorbar(data[0], mean, xerr=stderr, linestyle='')
-    axes[0].plot(mean, data[0], color='r', marker = 'o', 
+    print 'Correlation f (sm) cor',cor
+    turnTopRightOff(axes)
+    axes.errorbar(data[0], mean, yerr=stderr, color='#F15854', linestyle='')
+    axes.plot(data[0], mean, color='#4D4D4D', marker = 'o', 
                      linestyle='') #, label='Corr = %0.4f' % cor)
-    axes[0].set_xlabel('Model Predictions')        
-    axes[0].set_title('Simplicity Model')
-    axes[0].set_ylabel('Human Judgments')
-    axes[0].set_xlim(0, 0.2)
-    axes[0].set_ylim(0, 0.2)
+    axes.set_xlabel('Model Probabilities')        
+    #axes.set_title('Simplicity Model')
+    axes.set_ylabel('Mean Human Ratings')
+    axes.set_xlim(0, 0.2)
+    axes.set_ylim(0, 7)
 #    axes[0].legend(loc='upper left', fancybox=True, 
  #                  shadow=True, ncol=4, fontsize='small')
     
+    fig.set_size_inches(5,5)
+    plt.savefig('plots/plot_scatter_simplicity'+model+'_exp.eps', bbox_inches='tight')
+    plt.close(fig)
+
     
+    fig, axes = plt.subplots(1,1)
     cor = corr(data[1], mean)
-    axes[1].errorbar(data[1], mean, xerr=stderr, linestyle='')
-    axes[1].plot(mean, data[1], color='r', marker = 'o', linestyle='') #label='Corr = %0.4f' % cor
-    axes[1].set_xlabel('Model Predictions')        
-    axes[1].set_title('Utility-only Model')
-    axes[1].set_ylabel('Human Judgments')
-    axes[1].set_xlim(0, 0.2)
-    axes[1].set_ylim(0, 0.2)
+    print 'Correlation f (utility) cor',cor
+    turnTopRightOff(axes)
+    axes.errorbar(data[1], mean, yerr=stderr, color='#F15854', linestyle='')
+    axes.plot(data[1], mean, color='#4D4D4D', marker = 'o', linestyle='') #label='Corr = %0.4f' % cor
+    axes.set_xlabel('Model Probabilities')        
+    #axes.set_title('Utility-only Model')
+   # axes[1].set_ylabel('Mean Human Ratings')
+    axes.set_ylabel('Mean Human Ratings')
+    axes.set_xlim(0, 0.2)
+    axes.set_ylim(0, 7)
 #    axes[1].legend(loc='upper left', fancybox=True, 
  #                  shadow=True, ncol=4, fontsize='small')
-    
+ 
+    fig.set_size_inches(5,5)
+    plt.savefig('plots/plot_scatter_utility_'+model+'exp.eps', bbox_inches='tight')
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1,1)
     cor = corr(data[2], mean)
-    axes[2].errorbar(data[2], mean, xerr=stderr, linestyle='')
-    axes[2].plot(mean, data[2], color='r', marker = 'o', linestyle='') # label='Corr = %0.4f' % cor
-    axes[2].set_xlabel('Model Predictions')        
-    axes[2].set_title('Decision Net Model')
-    axes[2].set_ylabel('Human Judgments')
-    axes[2].set_xlim(0, 0.2)
-    axes[2].set_ylim(0, 0.2)
+    print 'Correlation f (model) cor',cor
+    turnTopRightOff(axes)
+    axes.errorbar(data[2], mean, yerr=stderr, color='#F15854', linestyle='')
+    axes.plot(data[2], mean, color='#4D4D4D', marker = 'o', linestyle='') # label='Corr = %0.4f' % cor
+    axes.set_xlabel('Model Probabilities')        
+    #axes.set_title('Decision Net Model')
+   # axes[2].set_ylabel('Mean Human Ratings')
+    axes.set_ylabel('Mean Human Ratings')
+    axes.set_xlim(0, 0.2)
+    axes.set_ylim(0, 7)
 #    axes[2].legend(loc='upper left', fancybox=True, 
   #                 shadow=True, ncol=4, fontsize='small')
     
-    fig.set_size_inches(20,5)
-    plt.savefig('plots/plot_scatter_exp.png', dpi=100, bbox_inches='tight')
+    fig.set_size_inches(5,5)
+    plt.savefig('plots/plot_scatter_decision_'+model+'exp.eps', bbox_inches='tight')
     plt.close(fig)
 
 
@@ -279,24 +346,33 @@ def plot_generate():
     # represents how many explanations were covered by top model predictions
     # starts at (0,0)
     case_1 = np.asarray([0,7,0,2,1,4,0,0,0,0,0,0,0,0]).cumsum() / 15.0
-    case_2 = np.asarray([0,9,3,0,1,1,0,0,1,0,0,0,0,0]).cumsum() / 15.0
-    case_3 = np.asarray([0,0,0,9,1,0,1,0,0,0,0,0,0,0]).cumsum() / 15.0
-    case_4 = np.asarray([0,8,6,0,0,0,1,0,0,0,0,0,0,0]).cumsum() / 15.0
+    case_2 = np.asarray([0,2,8,1,0,3,1,0,0,0,0,0,0,0]).cumsum() / 15.0
+    case_3 = np.asarray([0,6,0,0,2,0,3,0,0,0,0,0,0,0]).cumsum() / 15.0
+    case_4 = np.asarray([0,6,3,0,0,1,0,0,0,0,0,0,0,0]).cumsum() / 13.0
 
     fig, axes = plt.subplots(1,1)
-    axes.plot(np.arange(14), case_1, color='#F15854', linestyle='-')
-    axes.plot(np.arange(14), case_2, color='#B276B2', linestyle='-')
-    axes.plot(np.arange(14), case_3, color='#5DA5DA', linestyle='-')
-    axes.plot(np.arange(14), case_4, color='#FAA43A', linestyle='-')
-    axes.set_ylabel('Percent accounted for')
-    axes.set_xlabel('Number of best explanations used')
+    turnTopRightOff(axes)
+
+    axes.plot(np.arange(14), case_2, color='#B276B2', linestyle='-', marker='s', markersize=9)
+    axes.plot(np.arange(14), case_3, color='#5DA5DA', linestyle='-', marker='^', markersize=10)
+    axes.plot(np.arange(14), case_4, color='#FAA43A', linestyle='-', marker='8', markersize=6)
+    #axes.plot(np.arange(14), case_1, color='#F15854', linestyle='-', marker='D', markersize=6)
+
+    axes.annotate('Condition 1', xy=(13,0.98), xytext=(13.2,0.98), color='#B276B2', fontsize=14) 
+    axes.annotate('Condition 2', xy=(13,0.72), xytext=(13.2,0.72), color='#5DA5DA', fontsize=14) 
+    axes.annotate('Condition 3', xy=(13,0.78), xytext=(13.2,0.78), color='#FAA43A', fontsize=14) 
+    #axes.annotate('Condition 1', xy=(13,0.92), xytext=(13.2,0.92), color='#F15854') 
+
+    axes.set_ylabel('Proportion of responses')
+    axes.set_xlabel('Model\'s top N most probable explanations')
     axes.set_ylim(0,1.1)
     axes.set_xlim(0,13)
     fig.set_size_inches(5,5)
-    plt.savefig('plots/plot_generate_all.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_generate_all.eps', bbox_inches='tight')
     plt.close(fig)
 
     fig, axes = plt.subplots(1,1)
+    turnTopRightOff(axes)
     #fig.suptitle('Model predictions compared to generated responses', fontsize=18, fontweight='bold')
     axes.plot(np.arange(14), case_1, color='r', linestyle='-')
     axes.set_ylabel('Percent accounted for')
@@ -304,10 +380,11 @@ def plot_generate():
     axes.set_ylim(0,1.1)
     axes.set_xlim(0,13)
     fig.set_size_inches(5,5)
-    plt.savefig('plots/plot_generate_case1.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_generate_case1.eps', bbox_inches='tight')
     plt.close(fig)
   
     fig, axes = plt.subplots(1,1)
+    turnTopRightOff(axes)
     #fig.suptitle('Model predictions compared to generated responses', fontsize=18, fontweight='bold')
     axes.plot(np.arange(14), case_2, color='r', linestyle='-')
     axes.set_ylabel('Percent accounted for')
@@ -315,7 +392,7 @@ def plot_generate():
     axes.set_ylim(0,1.1)
     axes.set_xlim(0,13)
     fig.set_size_inches(5,5)
-    plt.savefig('plots/plot_generate_case2.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_generate_case2.eps', bbox_inches='tight')
     plt.close(fig)
 
     fig, axes = plt.subplots(1,1)
@@ -326,10 +403,11 @@ def plot_generate():
     axes.set_ylim(0,1.1)
     axes.set_xlim(0,13)
     fig.set_size_inches(5,5)
-    plt.savefig('plots/plot_generate_case3.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_generate_case3.eps', bbox_inches='tight')
     plt.close(fig)
 
     fig, axes = plt.subplots(1,1)
+    turnTopRightOff(axes)
    # fig.suptitle('Model predictions compared to generated responses', fontsize=18, fontweight='bold')
     axes.plot(np.arange(14), case_4, color='r', linestyle='-')
     axes.set_ylabel('Percent accounted for')
@@ -337,7 +415,7 @@ def plot_generate():
     axes.set_ylim(0,1.1)
     axes.set_xlim(0,13)
     fig.set_size_inches(5,5)
-    plt.savefig('plots/plot_generate_case4.png', dpi=100, bbox_inches='tight')
+    plt.savefig('plots/plot_generate_case4.eps', bbox_inches='tight')
     plt.close(fig)
     
 if __name__ == '__main__':
