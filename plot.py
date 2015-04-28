@@ -348,7 +348,7 @@ def plot_generate():
     case_1 = np.asarray([0,7,0,2,1,4,0,0,0,0,0,0,0,0]).cumsum() / 15.0
     case_2 = np.asarray([0,2,8,1,0,3,1,0,0,0,0,0,0,0]).cumsum() / 15.0
     case_3 = np.asarray([0,6,0,0,2,0,3,0,0,0,0,0,0,0]).cumsum() / 15.0
-    case_4 = np.asarray([0,6,3,0,0,1,0,0,0,0,0,0,0,0]).cumsum() / 13.0
+    case_4 = np.asarray([0,7,4,0,0,1,0,0,0,0,0,0,0,0]).cumsum() / 15.0
 
     fig, axes = plt.subplots(1,1)
     turnTopRightOff(axes)
